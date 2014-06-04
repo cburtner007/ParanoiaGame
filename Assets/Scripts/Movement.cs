@@ -3,49 +3,33 @@ using System.Collections;
 
 public class Movement : MonoBehaviour {
 
-	private float ACCELERATION = 10f;
-	private float SPEED_CAP = 0.14f;
-	public float speedH;
-	public float speedV;
-	public float speedZ;
+	public float speed = 6.0F;
+	public float jumpSpeed = 8.0F;
+	public float gravity = 20.0F;
+
+	private Vector3 moveDirection = Vector3.zero;
 
 	public Transform velocity;
-
 	// Use this for initialization
 	void Start () {
-		speedH = 0;
-		speedV = 0;
-		speedZ = 0;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		speedH = Input.GetAxisRaw ("Horizontal") * ACCELERATION * Time.deltaTime;
-		speedV = Input.GetAxisRaw ("Vertical") * ACCELERATION * Time.deltaTime;
-		speedZ = Input.GetAxisRaw ("Jump") * ACCELERATION * Time.deltaTime;
+		CharacterController controller = GetComponent<CharacterController>();
+		if (controller.isGrounded) {
+			moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+			moveDirection *= speed;
+			if (Input.GetButton("Jump"))
+				moveDirection.y = jumpSpeed;
+			
+		}
 
-		if (Mathf.Abs (speedH) > SPEED_CAP && speedH > 0)
-			speedH = SPEED_CAP;
-		else if (Mathf.Abs (speedH) > SPEED_CAP && speedH < 0)
-			speedH = -SPEED_CAP;
+		moveDirection.y -= gravity * Time.deltaTime;
+		controller.Move(moveDirection * Time.deltaTime);
 
-		if (Mathf.Abs(speedV) > SPEED_CAP && speedV > 0)
-			speedV = SPEED_CAP;
-		else if (Mathf.Abs(speedV) > SPEED_CAP && speedV < 0)
-			speedV = -SPEED_CAP;
+		if (Mathf.Abs(moveDirection.x) + speed/2 >= speed || Mathf.Abs(moveDirection.z) + speed/2 >= speed)
+			transform.LookAt (velocity.position);
 
-		if (Mathf.Abs(speedZ) > SPEED_CAP && speedZ > 0)
-			speedZ = SPEED_CAP;
-
-		//Debug.Log ("H: " + speedH + " V: " + speedV);
-
-		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.A))
-			rigidbody.AddForce (new Vector3(speedH, 0, 0), ForceMode.Impulse);
-		if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
-			rigidbody.AddForce (new Vector3(0, 0, speedV), ForceMode.Impulse);
-		if (Input.GetKey(KeyCode.Q))
-			rigidbody.AddForce (new Vector3(0, speedZ, 0), ForceMode.Impulse);
-
-		transform.LookAt (velocity);
 	}
 }

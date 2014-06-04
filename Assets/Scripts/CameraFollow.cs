@@ -14,6 +14,6 @@ public class CameraFollow : MonoBehaviour {
 		float x = target.position.x;
 		float y = target.position.y;
 		float z = target.position.z;
-		transform.position = new Vector3 (x, y + 18, z - 12);
+		transform.position = new Vector3 (x, y + 10, z - 12);
 	}
 }
