@@ -16,8 +16,12 @@ public class Movement : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		//the character controller is used for simple movement
 		CharacterController controller = GetComponent<CharacterController>();
+
+		//if the character is on the ground
 		if (controller.isGrounded) {
+			//read in the inputs, for digital (like a keyboard) 0 = not pressed and 1 = pressed
 			moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 			moveDirection *= speed;
 			if (Input.GetButton("Jump"))
@@ -25,9 +29,12 @@ public class Movement : MonoBehaviour {
 			
 		}
 
+		//continuously attempt to pull the character down due to a fake gravity
 		moveDirection.y -= gravity * Time.deltaTime;
+		//move the character based on the vector above
 		controller.Move(moveDirection * Time.deltaTime);
 
+		//force the player to look in the direction it's moving as long as it has some speed
 		if (Mathf.Abs(moveDirection.x) + speed/2 >= speed || Mathf.Abs(moveDirection.z) + speed/2 >= speed)
 			transform.LookAt (velocity.position);
 

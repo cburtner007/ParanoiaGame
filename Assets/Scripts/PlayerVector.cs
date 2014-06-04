@@ -14,8 +14,13 @@ public class PlayerVector : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		//a vector is first set to the player's current position
 		velocity = player.position;
+
+		//add in the characters velocity based on the CharacterController component
 		velocity += character.velocity;
+
+		//set this object to that position
 		transform.position = velocity;
 
 		//Debug.Log (moving.speedH*100);
