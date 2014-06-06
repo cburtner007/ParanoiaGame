@@ -15,7 +15,7 @@ public class Interaction : MonoBehaviour {
 	void Start () {
 		rend = GetComponent<Renderer> ();
 		move = player.GetComponent<Movement>();
-
+		//InvokeRepeating("CheckVisible", 0.0f, 1f);
 	}
 	
 	// Update is called once per frame
@@ -52,10 +52,29 @@ public class Interaction : MonoBehaviour {
 				Debug.Log("Deleted");
 			}
 		}
-
-
-
 	}
+
+	//potential method for detecting offscreen objects
+	//not working currently (raycasting via the camera is hard)
+	void CheckVisible() {
+		if(Camera.current != null) {
+			Vector3 pos = Camera.current.WorldToViewportPoint(transform.position);
+			if(pos.z > 0 && pos.x >= 0.0f && pos.x <=1.0f && pos.y >= 0.0f && pos.y <=1.0f) {
+				Ray ray = new Ray (transform.position, Camera.current.transform.position);
+				RaycastHit hit;
+				if (Physics.Raycast(ray, out hit))
+				{
+					Debug.DrawRay(ray.origin, hit.point);
+					Debug.Log("Blocked: " + gameObject.name);
+				}
+				else
+				{
+					Debug.Log (gameObject.name + " is visible");
+				}
+			}
+		}
+	}
+
 
 	//activates when another object enters the trigger area
 	//note this is the "Is Trigger" box collider that has an independent size, NOT the one used for direct collisions
