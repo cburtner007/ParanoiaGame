@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class Interaction : MonoBehaviour {
@@ -20,6 +20,9 @@ public class Interaction : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		//var forward = transform.TransformDirection(Vector3.forward) * 10;
+		//Debug.DrawRay (transform.position, Vector3.forward * 10, Color.green, 5.0f);
+		CheckVisible ();
 		if (inRange)
 		{
 			//"Jump" is set to the Spacebar by default
@@ -58,14 +61,20 @@ public class Interaction : MonoBehaviour {
 	//not working currently (raycasting via the camera is hard)
 	void CheckVisible() {
 		if(Camera.current != null) {
-			Vector3 pos = Camera.current.WorldToViewportPoint(transform.position);
+			Vector3 pos = Camera.main.WorldToViewportPoint(transform.position);
+			//change second paramater to be more accurate
+			Vector3 target = Camera.main.transform.position - transform.position;
+			//Debug.DrawRay(transform.position, target, Color.red);
+
+			//check if the position is on screen
 			if(pos.z > 0 && pos.x >= 0.0f && pos.x <=1.0f && pos.y >= 0.0f && pos.y <=1.0f) {
-				Ray ray = new Ray (transform.position, Camera.current.transform.position);
+				//check if it is obscured
+				Ray ray = new Ray (transform.position, target);
 				RaycastHit hit;
-				if (Physics.Raycast(ray, out hit))
+				if (Physics.Raycast(ray, out hit, target.magnitude))
 				{
-					Debug.DrawRay(ray.origin, hit.point);
-					Debug.Log("Blocked: " + gameObject.name);
+					Debug.DrawRay(ray.origin, hit.point-ray.origin, Color.green);
+					Debug.Log(gameObject.name + "is blocked by" + hit.collider.gameObject.name);
 				}
 				else
 				{
