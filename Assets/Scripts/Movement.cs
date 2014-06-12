@@ -17,6 +17,8 @@ public class Movement : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+
 		//the character controller is used for simple movement
 		CharacterController controller = GetComponent<CharacterController>();
 
