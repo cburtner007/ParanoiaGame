@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEditor;
 
 public class Interaction : MonoBehaviour {
 
@@ -7,6 +8,7 @@ public class Interaction : MonoBehaviour {
 	private Movement move;
 	private GameObject clone;
 	public GameObject player;
+	public GameObject targetChild;
 
 	private bool inRange = false;
 	private bool inspecting = false;
@@ -31,17 +33,19 @@ public class Interaction : MonoBehaviour {
 				inspecting = true;
 				//stops the players movement (see Movement script)
 				move.inspecting = true;
-				rend.material.color = (Color.green);
+				Renderer comp = targetChild.GetComponent<Renderer>();
+				
+				comp.material.color = (Color.green);
 
 				//draw a duplicate object in close up view
 				float x = player.transform.position.x;
 				float y = player.transform.position.y;
 				float z = player.transform.position.z;
-				clone = (GameObject) Instantiate(this.gameObject, new Vector3(x, y + 9, z -10), Quaternion.Euler(new Vector3(30, 0, 0)));
-				clone.rigidbody.useGravity = false;
+				clone = (GameObject) Instantiate(this.targetChild, new Vector3(x, y + 9, z -10), Quaternion.Euler(new Vector3(30, 0, 0)));
+				//clone.rigidbody.useGravity = false;
 				clone.renderer.material.color = Color.magenta;
-				clone.rigidbody.freezeRotation = true;
-				clone.rigidbody.Sleep();
+				//clone.rigidbody.freezeRotation = true;
+				//clone.rigidbody.Sleep();
 
 				Debug.Log("Created");
 			}
@@ -73,8 +77,11 @@ public class Interaction : MonoBehaviour {
 				RaycastHit hit;
 				if (Physics.Raycast(ray, out hit, target.magnitude))
 				{
+					
+					chooseNewIdentity();
 					Debug.DrawRay(ray.origin, hit.point-ray.origin, Color.green);
 					Debug.Log(gameObject.name + "is blocked by" + hit.collider.gameObject.name);
+
 				}
 				else
 				{
@@ -89,12 +96,40 @@ public class Interaction : MonoBehaviour {
 	//note this is the "Is Trigger" box collider that has an independent size, NOT the one used for direct collisions
 	void OnTriggerEnter(Collider other)
 	{
+		
+		Debug.Log("Entered range");
 		//only does something when the player enters the area
 		if (other.gameObject.Equals (player) && !Input.GetButton("Jump")) {
 			inRange = true;
-			rend.material.color = (Color.yellow);
+			Renderer comp = targetChild.GetComponent<Renderer>();
+
+			comp.material.color = (Color.yellow);
 			Debug.Log("Entered range");
+
 		}
+	}
+
+	void chooseNewIdentity()
+	{
+		ArrayList family = getFamily ();
+
+		//choose from a random set of changes
+		int r = Random.Range (0, family.Count);
+		Debug.Log ("Child: " + targetChild);
+
+		Debug.Log("Names:" + ((GameObject)family[r]).name + " " + targetChild.name);
+		while(((GameObject)family[r]).name.Equals(targetChild.name)){
+			r = Random.Range (0, family.Count);
+
+		}
+		Debug.Log ("Changed to : " + family[r]);
+
+		clone = (GameObject) Instantiate(((GameObject)family[r]), targetChild.transform.position, targetChild.transform.rotation);
+		clone.transform.parent = gameObject.transform;
+		clone.renderer.material.color = Color.red;
+		Destroy (targetChild);
+		targetChild = clone;
+		//Instantiate ((family[r]as GameObject));
 	}
 
 	//activates when another object exits the trigger area
@@ -104,9 +139,22 @@ public class Interaction : MonoBehaviour {
 		if (other.gameObject.Equals (player)) {
 			inRange = false;
 			inspecting = false;
-			rend.material.color = (Color.red);
+			Renderer comp = targetChild.GetComponent<Renderer>();
+			
+			comp.material.color = (Color.red);
 			Debug.Log("Exited range");
 		}
+	}
+
+	ArrayList getFamily()
+	{
+		GameObject[] prefabs = Resources.FindObjectsOfTypeAll (typeof(GameObject)) as GameObject[];
+		ArrayList family = new ArrayList(); //List<GameObject> family = new List<GameObject> ();
+		foreach(GameObject g in prefabs)
+			if(g.CompareTag(targetChild.tag) && (PrefabUtility.GetPrefabParent(g) == null))
+			   family.Add(g);
+	    return family;
+			   
 	}
 
 	void OnTriggerStay(Collider other)
