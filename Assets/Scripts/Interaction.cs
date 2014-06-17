@@ -15,7 +15,7 @@ public class Interaction : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		rend = GetComponent<Renderer> ();
+		rend = targetChild.GetComponent<Renderer>();
 		move = player.GetComponent<Movement>();
 		//InvokeRepeating("CheckVisible", 0.0f, 1f);
 	}
@@ -33,21 +33,21 @@ public class Interaction : MonoBehaviour {
 				inspecting = true;
 				//stops the players movement (see Movement script)
 				move.inspecting = true;
-				Renderer comp = targetChild.GetComponent<Renderer>();
 				
-				comp.material.color = (Color.green);
+				rend.material.color = (Color.green);
 
 				//draw a duplicate object in close up view
 				float x = player.transform.position.x;
 				float y = player.transform.position.y;
 				float z = player.transform.position.z;
 				clone = (GameObject) Instantiate(this.targetChild, new Vector3(x, y + 9, z -10), Quaternion.Euler(new Vector3(30, 0, 0)));
+				clone.tag = "IgnoreBlock";
 				//clone.rigidbody.useGravity = false;
 				clone.renderer.material.color = Color.magenta;
 				//clone.rigidbody.freezeRotation = true;
 				//clone.rigidbody.Sleep();
 
-				Debug.Log("Created");
+				//Debug.Log("Created");
 			}
 
 			//destroy the close up object and reset variables
@@ -56,7 +56,7 @@ public class Interaction : MonoBehaviour {
 				Destroy(clone);
 				inspecting = false;
 				move.inspecting = false;
-				Debug.Log("Deleted");
+				//Debug.Log("Deleted");
 			}
 		}
 	}
@@ -78,14 +78,17 @@ public class Interaction : MonoBehaviour {
 				if (Physics.Raycast(ray, out hit, target.magnitude))
 				{
 					
-					chooseNewIdentity();
 					Debug.DrawRay(ray.origin, hit.point-ray.origin, Color.green);
+					Debug.Log(gameObject.name + "is blocked by" + hit.collider.gameObject.name + " which is tagged with " + hit.collider.gameObject.tag);
+					if(hit.collider.gameObject.tag!="IgnoreBlock"){
+					chooseNewIdentity();
 					Debug.Log(gameObject.name + "is blocked by" + hit.collider.gameObject.name);
+					}
 
 				}
 				else
 				{
-					Debug.Log (gameObject.name + " is visible");
+					//Debug.Log (gameObject.name + " is visible");
 				}
 			}
 		}
@@ -101,10 +104,9 @@ public class Interaction : MonoBehaviour {
 		//only does something when the player enters the area
 		if (other.gameObject.Equals (player) && !Input.GetButton("Jump")) {
 			inRange = true;
-			Renderer comp = targetChild.GetComponent<Renderer>();
 
-			comp.material.color = (Color.yellow);
-			Debug.Log("Entered range");
+			rend.material.color = (Color.yellow);
+			//Debug.Log("Entered range");
 
 		}
 	}
@@ -115,20 +117,21 @@ public class Interaction : MonoBehaviour {
 
 		//choose from a random set of changes
 		int r = Random.Range (0, family.Count);
-		Debug.Log ("Child: " + targetChild);
+		//Debug.Log ("Child: " + targetChild);
 
-		Debug.Log("Names:" + ((GameObject)family[r]).name + " " + targetChild.name);
+		//Debug.Log("Names:" + ((GameObject)family[r]).name + " " + targetChild.name);
 		while(((GameObject)family[r]).name.Equals(targetChild.name)){
 			r = Random.Range (0, family.Count);
 
 		}
-		Debug.Log ("Changed to : " + family[r]);
+		//Debug.Log ("Changed to : " + family[r]);
 
 		clone = (GameObject) Instantiate(((GameObject)family[r]), targetChild.transform.position, targetChild.transform.rotation);
 		clone.transform.parent = gameObject.transform;
 		clone.renderer.material.color = Color.red;
 		Destroy (targetChild);
 		targetChild = clone;
+		rend = targetChild.GetComponent<Renderer>();
 		//Instantiate ((family[r]as GameObject));
 	}
 
@@ -139,10 +142,9 @@ public class Interaction : MonoBehaviour {
 		if (other.gameObject.Equals (player)) {
 			inRange = false;
 			inspecting = false;
-			Renderer comp = targetChild.GetComponent<Renderer>();
 			
-			comp.material.color = (Color.red);
-			Debug.Log("Exited range");
+			rend.material.color = (Color.red);
+			//Debug.Log("Exited range");
 		}
 	}
 

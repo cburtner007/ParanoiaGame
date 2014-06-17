@@ -25,11 +25,12 @@ public class WallFade : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		//if the room the player is in matches this walls id, make it transparent
-		if (currRoom.CurrentRoom == wallID)
-		{
+		if (currRoom.CurrentRoom == wallID) {
 			rend.material.color = hidden;
-		}
-		else
+			gameObject.tag = "IgnoreBlock";
+		} else {
 			rend.material.color = notHidden;
+			gameObject.tag = "Untagged";
+		}
 	}
 }
